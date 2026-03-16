@@ -1,0 +1,20 @@
+{
+  "destructive": [
+    "*.delete_asset",
+    "*.delete_actors",
+    "core.shutdown",
+    "level.delete_actors",
+    "data.delete_row",
+    "data.delete_rows"
+  ],
+  "mutating": [
+    "blueprint.compile",
+    "level.spawn_actor",
+    "level.set_property",
+    "data.add_row",
+    "data.update_row",
+    "data.set_tags",
+    "material.set_parameter",
+    "umg.set_property"
+  ]
+}
