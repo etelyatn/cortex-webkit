@@ -25,7 +25,7 @@ interface CommandState {
   setIsExecuting: (v: boolean) => void;
 }
 
-export const useCommandStore = create<CommandState>((set, get) => ({
+export const useCommandStore = create<CommandState>((set, _get) => ({
   rawInput: "",
   parsedDomain: "",
   parsedCommand: "",
