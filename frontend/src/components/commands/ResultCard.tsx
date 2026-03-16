@@ -23,6 +23,7 @@ export const ResultCard = memo(function ResultCard({ entry, onToggleFavorite }: 
     // Check if flat objects (all values are primitives)
     const first = arr[0];
     if (typeof first !== "object" || first === null) return null;
+    if (!Object.values(first as Record<string, unknown>).every(v => v === null || typeof v !== "object")) return null;
     return arr as Record<string, unknown>[];
   })();
   const hasTable = arrayData !== null;
