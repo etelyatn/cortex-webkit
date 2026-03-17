@@ -62,6 +62,7 @@ export function CommandInput({ onExecute }: CommandInputProps) {
                      disabled:opacity-50"
         />
         <button
+          type="button"
           onClick={onExecute}
           disabled={isExecuting || !rawInput.trim()}
           className="px-4 py-2 bg-accent text-white text-sm rounded hover:bg-accent/80
@@ -77,6 +78,7 @@ export function CommandInput({ onExecute }: CommandInputProps) {
                         max-h-48 overflow-y-auto z-10">
           {suggestions.slice(0, 15).map((s) => (
             <button
+              type="button"
               key={s}
               onMouseDown={() => {
                 setRawInput(s + " ");

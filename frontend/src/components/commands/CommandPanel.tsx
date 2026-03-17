@@ -160,8 +160,9 @@ export function CommandPanel() {
       useCommandStore.getState().inputMode === "raw" ? "structured" : "raw"
     )},
     { key: "C", ctrl: true, shift: true, handler: () => {
-      if (history.length > 0) {
-        navigator.clipboard.writeText(JSON.stringify(history[0].response.data, null, 2));
+      const data = history[0]?.response?.data;
+      if (data !== undefined && data !== null) {
+        navigator.clipboard.writeText(JSON.stringify(data, null, 2)).catch(() => {});
       }
     }},
     { key: "d", ctrl: true, handler: () => {
@@ -187,6 +188,7 @@ export function CommandPanel() {
             </div>
             <div className="flex gap-2 justify-end">
               <button
+                type="button"
                 ref={confirmCancelRef}
                 onClick={() => setConfirmCommand(null)}
                 className="px-3 py-1.5 text-xs bg-bg-tertiary border border-border rounded hover:bg-bg-primary"
@@ -194,6 +196,7 @@ export function CommandPanel() {
                 Cancel
               </button>
               <button
+                type="button"
                 onClick={() => { void doExecute(confirmCommand.domain, confirmCommand.command, confirmCommand.params); setConfirmCommand(null); }}
                 className="px-3 py-1.5 text-xs bg-error/20 text-error border border-error/40 rounded hover:bg-error/30"
               >

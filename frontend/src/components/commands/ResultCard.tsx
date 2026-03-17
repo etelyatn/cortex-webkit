@@ -33,12 +33,13 @@ export const ResultCard = memo(function ResultCard({ entry, onToggleFavorite }: 
       {/* Header */}
       <div className="px-3 py-1.5 flex items-center gap-2 text-xs bg-bg-tertiary">
         <button
+          type="button"
           onClick={() => onToggleFavorite(entry.id)}
           className={`${entry.isFavorite ? "text-warning" : "text-text-secondary"} hover:text-warning`}
         >
           ★
         </button>
-        <button onClick={() => setExpanded(!expanded)} className="flex-1 text-left flex items-center gap-2">
+        <button type="button" onClick={() => setExpanded(!expanded)} className="flex-1 text-left flex items-center gap-2">
           <span className="font-mono text-accent">{entry.domain}.{entry.command}</span>
           {Object.keys(entry.params ?? {}).length > 0 && (
             <span className="text-text-secondary font-mono truncate">
@@ -57,6 +58,7 @@ export const ResultCard = memo(function ResultCard({ entry, onToggleFavorite }: 
         <div className="px-3 py-2 border-t border-border">
           <div className="flex gap-1 mb-2">
             <button
+              type="button"
               onClick={() => setViewMode("tree")}
               className={`px-2 py-0.5 text-xs rounded ${viewMode === "tree" ? "bg-accent/20 text-accent" : "text-text-secondary"}`}
             >
@@ -64,6 +66,7 @@ export const ResultCard = memo(function ResultCard({ entry, onToggleFavorite }: 
             </button>
             {hasTable && (
               <button
+                type="button"
                 onClick={() => setViewMode("table")}
                 className={`px-2 py-0.5 text-xs rounded ${viewMode === "table" ? "bg-accent/20 text-accent" : "text-text-secondary"}`}
               >
@@ -71,6 +74,7 @@ export const ResultCard = memo(function ResultCard({ entry, onToggleFavorite }: 
               </button>
             )}
             <button
+              type="button"
               onClick={() => setViewMode("raw")}
               className={`px-2 py-0.5 text-xs rounded ${viewMode === "raw" ? "bg-accent/20 text-accent" : "text-text-secondary"}`}
             >

@@ -122,7 +122,7 @@ export const useChatStore = create<ChatState>((set, _get) => ({
     })),
 
   clearMessages: () =>
-    set({ messages: [], streamingText: "", totalUsage: { input_tokens: 0, output_tokens: 0 } }),
+    set({ messages: [], streamingText: "", streamingToolCalls: [], isStreaming: false, totalUsage: { input_tokens: 0, output_tokens: 0 } }),
 
   setChatWsStatus: (status) => set({ chatWsStatus: status }),
 }));

@@ -18,6 +18,7 @@ export default {
         success: "var(--success)",
         warning: "var(--warning)",
         error: "var(--error)",
+        border: "var(--border)",
       },
       borderColor: {
         DEFAULT: "var(--border)",

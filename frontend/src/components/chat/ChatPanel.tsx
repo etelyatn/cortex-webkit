@@ -24,6 +24,7 @@ export function ChatPanel() {
   const sentinelRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const isAtBottomRef = useRef(true);
+  const creatingRef = useRef(false);
 
   useEffect(() => {
     const sentinel = sentinelRef.current;
@@ -31,7 +32,7 @@ export function ChatPanel() {
 
     const observer = new IntersectionObserver(
       ([entry]) => { isAtBottomRef.current = entry.isIntersecting; },
-      { threshold: 0.1 },
+      { threshold: 1.0 },
     );
     observer.observe(sentinel);
     return () => observer.disconnect();
@@ -44,10 +45,18 @@ export function ChatPanel() {
   }, [messages.length, streamingText]);
 
   useEffect(() => {
-    if (!activeSessionId) {
-      api.createSession().then((session) => {
-        setActiveSession(session.id);
-      });
+    if (!activeSessionId && !creatingRef.current) {
+      creatingRef.current = true;
+      api.createSession()
+        .then((session) => {
+          setActiveSession(session.id);
+        })
+        .catch((err) => {
+          console.error("Failed to create session:", err);
+        })
+        .finally(() => {
+          creatingRef.current = false;
+        });
     }
   }, [activeSessionId, setActiveSession]);
 
@@ -64,6 +73,7 @@ export function ChatPanel() {
           {activeSessionId ? activeSessionId.slice(0, 8) : "No session"}
         </span>
         <button
+          type="button"
           onClick={handleNewChat}
           className="ml-auto text-xs text-accent hover:text-accent/80"
         >

@@ -54,6 +54,7 @@ export function ChatInput({ onSend, onCancel, isProcessing, disabled }: ChatInpu
         />
         {isProcessing ? (
           <button
+            type="button"
             onClick={onCancel}
             className="px-4 py-2 bg-error/20 text-error text-sm rounded border border-error/40 hover:bg-error/30"
           >
@@ -61,6 +62,7 @@ export function ChatInput({ onSend, onCancel, isProcessing, disabled }: ChatInpu
           </button>
         ) : (
           <button
+            type="button"
             onClick={handleSubmit}
             disabled={disabled || !value.trim()}
             className="px-4 py-2 bg-accent text-white text-sm rounded hover:bg-accent/80
