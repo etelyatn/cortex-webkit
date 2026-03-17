@@ -14,7 +14,7 @@ const VALID_TRANSITIONS: Record<EditorLifecycle, EditorLifecycle[]> = {
 };
 
 // States where editorStartedAt is cleared on transition
-const CLEAR_STARTED_AT_ON: EditorLifecycle[] = ['disconnected', 'error', 'timed_out'];
+const CLEAR_STARTED_AT_ON: EditorLifecycle[] = ['connected', 'disconnected', 'error', 'timed_out'];
 
 interface ConnectionState {
   editorLifecycle: EditorLifecycle;
