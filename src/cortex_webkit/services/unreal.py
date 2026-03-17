@@ -47,6 +47,7 @@ class AsyncUEConnection:
         )
 
     async def get_status(self) -> dict[str, Any]:
+        await self._ensure_connection()
         if self._conn is None:
             return {"connected": False}
         try:
@@ -63,6 +64,7 @@ class AsyncUEConnection:
             return {"connected": False}
 
     async def get_capabilities(self) -> dict[str, Any]:
+        await self._ensure_connection()
         if self._conn is None:
             return {"domains": []}
         try:

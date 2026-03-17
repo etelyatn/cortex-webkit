@@ -1,9 +1,12 @@
 # src/cortex_webkit/app.py
 """FastAPI application factory."""
 
+import re
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from pathlib import Path
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 import pathlib
 
@@ -78,6 +81,19 @@ def create_app(config: CortexWebConfig | None = None) -> FastAPI:
     # Serve built frontend (if dist exists)
     frontend_dist = pathlib.Path(__file__).parent.parent.parent / "frontend" / "dist"
     if frontend_dist.is_dir():
+        # Serve index.html with injected auth token — must be registered before StaticFiles
+        @app.get("/", include_in_schema=False)
+        async def serve_index(request: Request):
+            dist_dir = Path(__file__).parent.parent.parent / "frontend" / "dist"
+            index_path = dist_dir / "index.html"
+            if not index_path.exists():
+                return HTMLResponse("<h1>Frontend not built. Run scripts/build.sh</h1>", status_code=404)
+            html = index_path.read_text(encoding="utf-8")
+            token = request.app.state.config.auth_token
+            script = f'<script>window.__CORTEX_TOKEN__ = "{token}";</script>'
+            html = re.sub(r"</head>", f"{script}</head>", html, count=1)
+            return HTMLResponse(html)
+
         app.mount("/", StaticFiles(directory=str(frontend_dist), html=True))
 
     return app
