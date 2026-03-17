@@ -190,6 +190,10 @@ class EditorLifecycleManager:
             )
 
         self._cancel_event.set()
+        # Cancel the previous background task before replacing it
+        if self._bg_task and not self._bg_task.done():
+            self._bg_task.cancel()
+            # Don't await — let it cancel in background
         self._transition("stopping")
 
         self._bg_task = asyncio.create_task(self._run_stop())

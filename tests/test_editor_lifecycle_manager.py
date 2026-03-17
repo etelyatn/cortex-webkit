@@ -372,3 +372,58 @@ async def test_shutdown_cancels_background_task():
     await mgr.shutdown()
 
     assert mgr._bg_task.cancelled()
+
+
+# ---------------------------------------------------------------------------
+# 22. initialize() — no port files stays disconnected
+# ---------------------------------------------------------------------------
+
+async def test_initialize_stays_disconnected_when_no_port_files(tmp_path):
+    """If no CortexPort-*.txt files exist, state remains disconnected."""
+    mgr = make_manager(project_dir=str(tmp_path))
+    # tmp_path/Saved/ does not exist, so glob returns nothing
+    await mgr.initialize()
+    assert mgr.state == "disconnected"
+
+
+# ---------------------------------------------------------------------------
+# 23. initialize() — port file present but TCP fails stays disconnected
+# ---------------------------------------------------------------------------
+
+async def test_initialize_stays_disconnected_on_tcp_failure(tmp_path):
+    """Port file found but TCP verification fails; state stays disconnected."""
+    saved_dir = tmp_path / "Saved"
+    saved_dir.mkdir()
+    port_file = saved_dir / "CortexPort-12345.txt"
+    port_file.write_text('{"port": 8742, "pid": 12345, "project": "CortexSandbox"}')
+
+    mgr = make_manager(project_dir=str(tmp_path))
+
+    with patch.object(mgr, "_verify_tcp_connection", return_value=False):
+        await mgr.initialize()
+
+    assert mgr.state == "disconnected"
+
+
+# ---------------------------------------------------------------------------
+# 24. initialize() — port file present and TCP succeeds transitions to connected
+# ---------------------------------------------------------------------------
+
+async def test_initialize_transitions_to_connected_on_tcp_success(tmp_path):
+    """Port file found and TCP verification succeeds; state becomes connected."""
+    saved_dir = tmp_path / "Saved"
+    saved_dir.mkdir()
+    port_file = saved_dir / "CortexPort-12345.txt"
+    port_file.write_text(
+        '{"port": 8742, "pid": 12345, "project_path": "/fake/CortexSandbox.uproject"}'
+    )
+
+    mgr = make_manager(project_dir=str(tmp_path))
+
+    with patch.object(mgr, "_verify_tcp_connection", return_value=True):
+        await mgr.initialize()
+
+    assert mgr.state == "connected"
+    assert mgr.port == 8742
+    assert mgr.pid == 12345
+    assert mgr.project == "CortexSandbox"
