@@ -35,4 +35,8 @@ export const api = {
   deleteSession: (id: string) => request<any>(`/api/sessions/${id}`, { method: "DELETE" }),
   getSettings: () => request<any>("/api/settings"),
   updateSettings: (body: any) => request<any>("/api/settings", { method: "PUT", body: JSON.stringify(body) }),
+  startEditor: () => request<{ state: string; started_at: number }>("/api/editor/start", { method: "POST" }),
+  stopEditor: () => request<{ state: string }>("/api/editor/stop", { method: "POST" }),
+  restartEditor: () => request<{ state: string; started_at: number }>("/api/editor/restart", { method: "POST" }),
+  getEditorStatus: () => request<{ state: string; started_at: number | null; error: string | null; port: number | null; pid: number | null; project: string | null }>("/api/editor/status"),
 };

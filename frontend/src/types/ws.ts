@@ -1,5 +1,14 @@
 // frontend/src/types/ws.ts
 
+export type EditorLifecycle =
+  | 'disconnected'
+  | 'starting'
+  | 'connected'
+  | 'stopping'
+  | 'restarting'
+  | 'timed_out'
+  | 'error';
+
 /** Client → Server */
 export type ClientMessage =
   | { type: "user_message"; session_id: string; content: string }
@@ -17,7 +26,8 @@ export type ServerEvent =
   | { type: "error"; code: string; message: string; retryable: boolean }
   | { type: "replay_start"; event_count: number }
   | { type: "replay_end" }
-  | { type: "ue_status"; connected: boolean; port?: number; pid?: number; project?: string };
+  | { type: "ue_status"; connected: boolean; port?: number; pid?: number; project?: string }
+  | { type: "editor.lifecycle"; state: EditorLifecycle; started_at?: number; port?: number; pid?: number; project?: string; error?: string };
 
 export interface TokenUsage {
   input_tokens: number;
