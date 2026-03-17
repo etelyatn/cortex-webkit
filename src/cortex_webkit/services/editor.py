@@ -138,13 +138,10 @@ class EditorLifecycleManager:
         event = self._build_event(to, meta)
         # Fire-and-forget: schedule on the running event loop
         try:
-            loop = asyncio.get_event_loop()
-            if loop.is_running():
-                asyncio.ensure_future(self._event_bus.emit(event))
-            else:
-                loop.run_until_complete(self._event_bus.emit(event))
+            loop = asyncio.get_running_loop()
+            loop.create_task(self._event_bus.emit(event))
         except RuntimeError:
-            # No event loop available (e.g. test teardown) — skip emit
+            # No running loop (e.g. called from sync context during init)
             pass
 
     def _build_event(self, state: str, meta: dict) -> dict:
@@ -327,6 +324,8 @@ class EditorLifecycleManager:
         """Apply the result from _launch_editor_sync to the state machine."""
         if result.get("cancelled"):
             self._transition("disconnected")
+        elif result.get("error") == "timed_out":
+            self._transition("timed_out", {"error": result.get("message", "Editor did not start in time")})
         elif result.get("error"):
             self._transition("error", {"error": result["error"]})
         else:

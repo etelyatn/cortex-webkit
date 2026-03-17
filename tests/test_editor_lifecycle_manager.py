@@ -341,6 +341,27 @@ async def test_get_status_includes_all_fields_when_connected():
 # 20. shutdown() cancels background task
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# 21. _run_start transitions to timed_out on timeout sentinel
+# ---------------------------------------------------------------------------
+
+async def test_start_transitions_to_timed_out_on_timeout():
+    mgr = make_manager(project_dir="/fake/project")
+    mgr._state = "starting"
+    mgr._started_at = int(time.time())
+
+    timeout_result = {
+        "error": "timed_out",
+        "message": "Editor did not start within 120s",
+    }
+
+    with patch.object(mgr, "_launch_editor_sync", return_value=timeout_result):
+        await mgr._run_start()
+
+    assert mgr.state == "timed_out"
+    assert mgr.error == "Editor did not start within 120s"
+
+
 async def test_shutdown_cancels_background_task():
     mgr = make_manager()
 
