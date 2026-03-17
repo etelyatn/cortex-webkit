@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useCommandStore } from "../../stores/commandStore";
-import { useConnectionStore } from "../../stores/connectionStore";
 import { useHotkeys } from "../../hooks/useHotkeys";
 import { api } from "../../lib/api";
 import { parseCommandInput } from "../../lib/parseCommand";
@@ -34,7 +33,6 @@ export function CommandPanel() {
   const addResult = useCommandStore((s) => s.addResult);
   const toggleFavorite = useCommandStore((s) => s.toggleFavorite);
   const setIsExecuting = useCommandStore((s) => s.setIsExecuting);
-  const ueConnected = useConnectionStore((s) => s.ueConnected);
   const [confirmCommand, setConfirmCommand] = useState<{ domain: string; command: string; params: Record<string, unknown> } | null>(null);
   const confirmCancelRef = useRef<HTMLButtonElement>(null);
 
@@ -236,10 +234,6 @@ export function CommandPanel() {
 
       {/* Status bar */}
       <div className="px-4 py-1.5 flex items-center gap-3 text-xs bg-bg-secondary border-t border-border shrink-0">
-        <span className={`flex items-center gap-1 ${ueConnected ? "text-success" : "text-error"}`}>
-          <span className={`w-1.5 h-1.5 rounded-full ${ueConnected ? "bg-success" : "bg-error"}`} />
-          {ueConnected ? "Connected" : "Disconnected"}
-        </span>
         {history.length > 0 && (
           <span className="text-text-secondary">
             Last: {history[0]?.response.duration_ms}ms

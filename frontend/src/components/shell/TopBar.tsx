@@ -1,13 +1,24 @@
 // frontend/src/components/shell/TopBar.tsx
 
 import { useConnectionStore } from "../../stores/connectionStore";
+import type { EditorLifecycle } from "../../types/ws";
+
+const dotClass: Record<EditorLifecycle, string> = {
+  connected:    'bg-success',
+  disconnected: 'bg-error',
+  starting:     'bg-warning animate-pulse',
+  restarting:   'bg-warning animate-pulse',
+  stopping:     'bg-warning animate-pulse',
+  timed_out:    'bg-error',
+  error:        'bg-error',
+};
 
 interface TopBarProps {
   onMenuToggle?: () => void;
 }
 
 export function TopBar({ onMenuToggle }: TopBarProps) {
-  const ueConnected = useConnectionStore((s) => s.ueConnected);
+  const editorLifecycle = useConnectionStore((s) => s.editorLifecycle);
   const ueProject = useConnectionStore((s) => s.ueProject);
 
   return (
@@ -23,12 +34,7 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
         {ueProject ?? "No Project"}
       </span>
       <div className="ml-auto flex items-center gap-2">
-        <span
-          className={`w-2 h-2 rounded-full ${ueConnected ? "bg-success" : "bg-error"}`}
-        />
-        <span className="text-xs text-text-secondary hidden sm:inline">
-          {ueConnected ? "UE Connected" : "UE Disconnected"}
-        </span>
+        <span className={`w-2 h-2 rounded-full ${dotClass[editorLifecycle]}`} />
       </div>
     </div>
   );
