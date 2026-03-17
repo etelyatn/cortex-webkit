@@ -162,6 +162,38 @@ class EditorLifecycleManager:
         return event
 
     # ------------------------------------------------------------------
+    # Initialization helpers
+    # ------------------------------------------------------------------
+
+    async def _initialize_state_connected(
+        self, port: int, pid: int, project: str
+    ) -> None:
+        """Set initial connected state during startup probe.
+
+        Called only from initialize() before the state machine is active.
+        Bypasses VALID_TRANSITIONS because disconnected->connected is not
+        a normal transition — the standard path is disconnected->starting->connected.
+        """
+        # Guard: this is only valid as an initialization path
+        if self._state != "disconnected":
+            logger.warning(
+                "_initialize_state_connected called from non-disconnected state: %s",
+                self._state,
+            )
+            return
+        self._state = "connected"
+        self._port = port
+        self._pid = pid
+        self._project = project
+        await self._event_bus.emit({
+            "type": "editor.lifecycle",
+            "state": "connected",
+            "port": port,
+            "pid": pid,
+            "project": project,
+        })
+
+    # ------------------------------------------------------------------
     # Public async API
     # ------------------------------------------------------------------
 
@@ -255,11 +287,7 @@ class EditorLifecycleManager:
                     self._verify_tcp_connection, port
                 )
                 if verified:
-                    self._port = port
-                    self._pid = pid
-                    self._project = project_name
-                    self._state = "connected"
-                    await self._event_bus.emit(self._build_event("connected", {}))
+                    await self._initialize_state_connected(port, pid, project_name)
                     logger.info(
                         "EditorLifecycleManager: found running editor on port %d (pid=%s)",
                         port,
