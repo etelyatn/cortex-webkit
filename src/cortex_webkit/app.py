@@ -21,12 +21,23 @@ async def _lifespan(app: FastAPI):
     # Import here to avoid circular imports
     from cortex_webkit.session import SessionManager
     from cortex_webkit.services.unreal import AsyncUEConnection
+    from cortex_webkit.services.event_bus import EventBus
+    from cortex_webkit.services.editor import EditorLifecycleManager
 
     ue_conn = AsyncUEConnection(project_dir=config.ue_project_dir)
     session_mgr = SessionManager(config=config)
+    event_bus = EventBus()
+    editor_lifecycle = EditorLifecycleManager(
+        event_bus=event_bus,
+        project_dir=config.ue_project_dir,
+        async_ue_conn=ue_conn,
+    )
+    await editor_lifecycle.initialize()  # Startup probe
 
     app.state.ue_connection = ue_conn
     app.state.session_manager = session_mgr
+    app.state.event_bus = event_bus
+    app.state.editor_lifecycle = editor_lifecycle
     app.state.settings = {
         "model": "claude-sonnet-4-6",
         "effort": "medium",
@@ -37,6 +48,7 @@ async def _lifespan(app: FastAPI):
 
     yield
 
+    await editor_lifecycle.shutdown()
     await session_mgr.shutdown_all()
 
 
@@ -65,11 +77,13 @@ def create_app(config: CortexWebConfig | None = None) -> FastAPI:
     from cortex_webkit.api.commands import router as commands_router
     from cortex_webkit.api.sessions import router as sessions_router
     from cortex_webkit.api.settings import router as settings_router
+    from cortex_webkit.api.editor import router as editor_router
 
     app.include_router(status_router, prefix="/api")
     app.include_router(commands_router, prefix="/api")
     app.include_router(sessions_router, prefix="/api")
     app.include_router(settings_router, prefix="/api")
+    app.include_router(editor_router, prefix="/api")
 
     # Register WebSocket routes
     from cortex_webkit.ws.chat import router as chat_ws_router

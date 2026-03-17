@@ -25,6 +25,19 @@ async def test_get_status_disconnected():
     assert status["connected"] is False
 
 
+@pytest.mark.asyncio
+async def test_reset_clears_connection():
+    mock_conn = MagicMock()
+    mock_conn.connected = True
+
+    ue = AsyncUEConnection()
+    ue._conn = mock_conn
+
+    assert ue._conn is not None
+    await ue.reset()
+    assert ue._conn is None
+
+
 from fastapi.testclient import TestClient
 from cortex_webkit.app import create_app
 from cortex_webkit.config import CortexWebConfig

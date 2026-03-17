@@ -63,6 +63,10 @@ class AsyncUEConnection:
         except Exception:
             return {"connected": False}
 
+    async def reset(self) -> None:
+        """Drop cached connection so next call creates a fresh one."""
+        self._conn = None
+
     async def get_capabilities(self) -> dict[str, Any]:
         await self._ensure_connection()
         if self._conn is None:

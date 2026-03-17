@@ -51,9 +51,10 @@ _ERROR_STATES = {"error", "timed_out"}
 class EditorLifecycleManager:
     """Manages the Unreal Editor process lifecycle via a state machine."""
 
-    def __init__(self, event_bus: EventBus, project_dir: str | None = None):
+    def __init__(self, event_bus: EventBus, project_dir: str | None = None, async_ue_conn=None):
         self._event_bus = event_bus
         self._project_dir = project_dir or os.environ.get("CORTEX_PROJECT_DIR", "")
+        self._async_ue_conn = async_ue_conn
 
         # State
         self._state: str = "disconnected"
@@ -294,6 +295,8 @@ class EditorLifecycleManager:
                 None,  # no current pid — fresh start
             )
             self._apply_launch_result(result)
+            if self._state == "connected" and self._async_ue_conn is not None:
+                await self._async_ue_conn.reset()
         except asyncio.CancelledError:
             self._transition("disconnected")
         except Exception as exc:
@@ -309,6 +312,8 @@ class EditorLifecycleManager:
                 self._pid,  # current pid for shutdown
             )
             self._apply_launch_result(result)
+            if self._state == "connected" and self._async_ue_conn is not None:
+                await self._async_ue_conn.reset()
         except asyncio.CancelledError:
             self._transition("disconnected")
         except Exception as exc:
