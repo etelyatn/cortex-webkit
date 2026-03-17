@@ -75,7 +75,7 @@ async def execute_command(body: dict):
 _sessions: dict[str, dict] = {}
 
 @app.post("/api/sessions")
-async def create_session(body: dict = {}):
+async def create_session(body: dict | None = None):
     sid = str(uuid.uuid4())
     _sessions[sid] = {"id": sid, "backend": "cli", "model": "claude-sonnet-4-6", "state": "idle", "message_count": 0}
     return _sessions[sid]
