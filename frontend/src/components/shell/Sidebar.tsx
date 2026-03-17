@@ -66,7 +66,7 @@ function EditorSection() {
       case 'disconnected': return <span className="text-error">Disconnected</span>;
       case 'starting':     return <span className="text-warning">Starting... ({elapsed}s)</span>;
       case 'restarting':   return <span className="text-warning">Restarting... ({elapsed}s)</span>;
-      case 'stopping':     return <span className="text-warning">Stopping...</span>;
+      case 'stopping':     return <span className="text-warning">Stopping... ({elapsed}s)</span>;
       case 'timed_out':    return <span className="text-error">Timed Out</span>;
       case 'error':        return <span className="text-error">Error</span>;
     }
@@ -182,7 +182,7 @@ function EditorSection() {
           disabled
           className="mt-1 w-full px-3 py-1.5 text-xs bg-warning/20 text-warning border border-warning/40 rounded opacity-50 cursor-not-allowed animate-pulse"
         >
-          Stopping...
+          Stopping... ({elapsed}s)
         </button>
       )}
 
