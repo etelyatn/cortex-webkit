@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useRef } from "react";
 import { useCommandStore } from "../../stores/commandStore";
+import { parseCommandInput } from "../../lib/parseCommand";
 
 interface CommandInputProps {
   onExecute: () => void;
@@ -17,20 +18,7 @@ export function CommandInput({ onExecute }: CommandInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Parse "domain.command param=value"
-  const parsed = useMemo(() => {
-    const parts = rawInput.trim().split(/\s+/);
-    const [domainCmd, ...paramParts] = parts;
-    const [domain, ...cmdParts] = (domainCmd ?? "").split(".");
-    const command = cmdParts.join(".");
-    const params: Record<string, string> = {};
-    for (const p of paramParts) {
-      const eq = p.indexOf("=");
-      if (eq > 0) {
-        params[p.slice(0, eq)] = p.slice(eq + 1);
-      }
-    }
-    return { domain, command, params };
-  }, [rawInput]);
+  const parsed = useMemo(() => parseCommandInput(rawInput), [rawInput]);
 
   // Autocomplete suggestions
   const suggestions = useMemo(() => {

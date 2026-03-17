@@ -5,6 +5,7 @@ import { useCommandStore } from "../../stores/commandStore";
 import { useConnectionStore } from "../../stores/connectionStore";
 import { useHotkeys } from "../../hooks/useHotkeys";
 import { api } from "../../lib/api";
+import { parseCommandInput } from "../../lib/parseCommand";
 import { CommandInput } from "./CommandInput";
 import { ParamForm } from "./ParamForm";
 import { ResultCard } from "./ResultCard";
@@ -35,6 +36,7 @@ export function CommandPanel() {
   const setIsExecuting = useCommandStore((s) => s.setIsExecuting);
   const ueConnected = useConnectionStore((s) => s.ueConnected);
   const [confirmCommand, setConfirmCommand] = useState<{ domain: string; command: string; params: Record<string, unknown> } | null>(null);
+  const confirmCancelRef = useRef<HTMLButtonElement>(null);
 
   // Structured param form state
   const [paramValues, setParamValues] = useState<Record<string, unknown>>({});
@@ -49,17 +51,21 @@ export function CommandPanel() {
   }, [setCapabilities]);
 
   // Parse current input to find matching command schema
-  const parsed = useMemo(() => {
-    const parts = rawInput.trim().split(/\s+/);
-    const [domainCmd] = parts;
-    const [domain, ...cmdParts] = (domainCmd ?? "").split(".");
-    const command = cmdParts.join(".");
-    return { domain, command };
-  }, [rawInput]);
+  const parsed = useMemo(() => parseCommandInput(rawInput), [rawInput]);
 
-  const matchedCommand = capabilities
-    .find((d) => d.name === parsed.domain)
-    ?.commands.find((c) => c.name === parsed.command);
+  const matchedCommand = useMemo(
+    () => capabilities
+      .find((d) => d.name === parsed.domain)
+      ?.commands.find((c) => c.name === parsed.command),
+    [capabilities, parsed.domain, parsed.command]
+  );
+
+  // Focus Cancel button when destructive confirm dialog appears
+  useEffect(() => {
+    if (confirmCommand) {
+      confirmCancelRef.current?.focus();
+    }
+  }, [confirmCommand]);
 
   // Bidirectional sync between rawInput and paramValues
   const syncSourceRef = useRef<"raw" | "form" | null>(null);
@@ -86,7 +92,7 @@ export function CommandPanel() {
       const next = { ...prev, [key]: value };
       const base = `${parsed.domain}.${parsed.command}`;
       const paramStr = Object.entries(next)
-        .filter(([, v]) => v !== "" && v != null)
+        .filter(([, v]) => v !== "" && v != null && !Number.isNaN(v))
         .map(([k, v]) => `${k}=${v}`)
         .join(" ");
       setRawInput(paramStr ? `${base} ${paramStr}` : base);
@@ -181,13 +187,14 @@ export function CommandPanel() {
             </div>
             <div className="flex gap-2 justify-end">
               <button
+                ref={confirmCancelRef}
                 onClick={() => setConfirmCommand(null)}
                 className="px-3 py-1.5 text-xs bg-bg-tertiary border border-border rounded hover:bg-bg-primary"
               >
                 Cancel
               </button>
               <button
-                onClick={() => { doExecute(confirmCommand.domain, confirmCommand.command, confirmCommand.params); setConfirmCommand(null); }}
+                onClick={() => { void doExecute(confirmCommand.domain, confirmCommand.command, confirmCommand.params); setConfirmCommand(null); }}
                 className="px-3 py-1.5 text-xs bg-error/20 text-error border border-error/40 rounded hover:bg-error/30"
               >
                 Execute

@@ -54,7 +54,15 @@ function ParamField({
           type="number"
           value={value != null ? String(value) : ""}
           placeholder={param.default != null ? String(param.default) : undefined}
-          onChange={(e) => onChange(param.name, param.type === "integer" ? parseInt(e.target.value) : parseFloat(e.target.value))}
+          onChange={(e) => {
+            if (param.type === "integer") {
+              const v = parseInt(e.target.value);
+              onChange(param.name, isNaN(v) ? "" : v);
+            } else {
+              const v = parseFloat(e.target.value);
+              onChange(param.name, isNaN(v) ? "" : v);
+            }
+          }}
           className="w-full bg-bg-primary border border-border rounded px-2 py-1 text-xs font-mono
                      focus:outline-none focus:border-accent"
         />

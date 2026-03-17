@@ -16,8 +16,8 @@ export const ResultCard = memo(function ResultCard({ entry, onToggleFavorite }: 
   // Detect array data for table view
   const arrayData = (() => {
     if (!entry.response.data || typeof entry.response.data !== "object") return null;
-    const d = entry.response.data as any;
-    const arr = d.items ?? d.results;
+    const d = entry.response.data as Record<string, unknown>;
+    const arr = d["items"] ?? d["results"];
 
     if (!Array.isArray(arr) || arr.length === 0) return null;
     // Check if flat objects (all values are primitives)
